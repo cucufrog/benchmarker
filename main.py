@@ -4,7 +4,7 @@ import os
 import socket
 import sys
 import traceback
-import paramiko
+import fabric
 import threading
 
 class Worker(threading.Thread):
@@ -15,7 +15,6 @@ class Worker(threading.Thread):
 
     def run(self):
         # setup logging
-        paramiko.util.log_to_file('demo.log')
         
         hostname = self.hostname
         cmd = self.cmd

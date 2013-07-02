@@ -1,0 +1,9 @@
+{
+"port":5233,
+"localhost":{"name":"localhost", "ip":"127.0.0.1"}, 
+"host":{"name":"esx", "ip":"127.0.0.1"}, 
+"guest":[
+	{"name":"vm1", "ip":"127.0.0.1"}, 
+	{"name": "vm2", "ip":"127.0.0.1"}
+	]
+}

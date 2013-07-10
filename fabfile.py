@@ -17,3 +17,7 @@ def serial_cmd(cmd):
 
 def sudo_cmd(cmd):
     sudo(cmd)
+
+@parallel
+def upload(file):
+    put(file, '/home/ouyang/')

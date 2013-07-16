@@ -1,17 +1,17 @@
 #!/bin/bash
 
 
-#parsec.blackscholes \
-#parsec.bodytrack \
-#parsec.canneal \
-#parsec.dedup \
-#parsec.ferret \
-#parsec.fluidanimate \
-#parsec.freqmine \
-#parsec.raytrace \
-#parsec.streamcluster \
-#parsec.swaptions \
 BENCHMARKS="\
+parsec.blackscholes \
+parsec.bodytrack \
+parsec.canneal \
+parsec.dedup \
+parsec.ferret \
+parsec.fluidanimate \
+parsec.freqmine \
+parsec.raytrace \
+parsec.streamcluster \
+parsec.swaptions \
 parsec.vips \
 parsec.x264 \
 ouyang.hackbench \
@@ -30,17 +30,21 @@ BENCHMARKS_TMP="ouyang.hackbench"
 LOG=`date +%m-%d-%y_%H%M`.log
 echo > log/$LOG
 
-for benchmark in $BENCHMARKS_TMP; do
+for benchmark in $BENCHMARKS; do
 	echo "==== Running $benchmark ===="
-	cmd="cd bench/parsec-3.0; source env.sh; parsecmgmt -k -a run -p $benchmark -i native -n 8 -d /mnt"
+	cmd="cd bench/parsec-3.0; source env.sh; parsecmgmt -k -a run -p $benchmark -i native -n 8"
 	echo "=== $benchmark ===" >> log/$LOG
 	#ssh root@esx "sched-stats -t vcpu-state-counts | grep ubuntu | grep vcpu" | tee -a log/$LOG
-	ssh root@esx "sched-stats -r" | tee -a log/$LOG
+	ssh root@esx "sched-stats -r; sched-stats -s 1" | tee -a log/$LOG
 	echo | tee -a log/$LOG
 	(time fab -H vm1,vm2,vm3,vm4 cmd:"$cmd" --hide=stdout) 2>&1 | tee -a log/$LOG
 	#ssh root@esx "sched-stats -t vcpu-state-counts | grep ubuntu | grep vcpu" | tee -a log/$LOG
-	ssh root@esx "vsi_traverse -o /vmfs/volumes/datastore1/log/$LOG" | tee -a log/$LOG
+	ssh root@esx "vsi_traverse -o /vmfs/volumes/datastore1/log/$benchmark.log" | tee -a log/$LOG
 	echo "==== Done $benchmark ===="
 done
 
 #fab -H vm1,vm2,vm3,vm4 cmd:"rm -rf ~/bench/parsec-3.0/log/*" --hide=stdout 
+# collect data
+fab -H vm1 cmd:"cd ~/data; git pull; mkdir -p ./vsi_traverse/0/"
+for i in 1 2 3 4; do
+	fab -H vm$i cmd:"cd ~/data; git pull; mv ~/bench/parsec-3.0/log/amd64* ./vsi_traverse/0/guest$i; git add .; git commit -am \"add\"; git push;"

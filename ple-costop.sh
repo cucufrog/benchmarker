@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# XXX
-TAG="ple6kx2"
+TAG="PLECostopX4"
 DATA_DIR="~/data"
-PARAM_LIST="0 3k"
+PARAM_LIST="3k"
 INPUT="native"
 NR_THREADS=8
 
@@ -41,28 +40,11 @@ LOG="$TIMESTAMP.log"
 echo > log/$LOG
 
 #
-# Init data dir
-#
-#cd ~/data
-#git pull
-#for param in $PARAM_LIST; do
-#	for i in 1 2 3 4 5; do
-#		mkdir -p $EXP_DIR/$param-$i 
-#		ssh root@esx "mkdir -p /vmfs/volumes/datastore1/data/$EXP_DIR/$param-$i" 
-#	done
-#done
-#git add .
-#git commit -am "mkdir for $EXP_DIR"
-#git push
-#cd $CUR_DIR
-#exit
-
-#
 # Cleaning
 #
 rm log/*
 # XXX: number of VM
-fab -H vm1,vm2 cmd:"rm -rf ~/bench/parsec-3.0/log/*"
+fab -H vm1 cmd:"rm -rf ~/bench/parsec-3.0/log/*"
 ssh root@esx "rm /vmfs/volumes/datastore1/log/*"
 
 #
@@ -85,7 +67,7 @@ for param in $PARAM_LIST; do
 
 			cmd="cd bench/parsec-3.0; source env.sh; parsecmgmt -k -a run -p $benchmark -i $INPUT -n $NR_THREADS"
 			# XXX: number of VM
-			(time fab -H vm1,vm2 cmd:"$cmd" --hide=stdout) 2>&1 | tee -a log/$LOG
+			(time fab -H vm1 cmd:"$cmd" --hide=stdout) 2>&1 | tee -a log/$LOG
 			#(time fab -H vm1 cmd:"$cmd" --hide=stdout) 2>&1 | tee -a log/$LOG
 			
 			#host stat dump
@@ -100,8 +82,8 @@ for param in $PARAM_LIST; do
 				mkdir -p $EXP_DIR/$param-$i;"
 
 		# XXX: number of VM
-		for j in 1 2; do
-		# for j in 1; do
+		for j in 1; do
+		#for j in 1; do
 			fab -H vm$j cmd:"cd ~/data; \
 					git pull; \
 					mv ~/bench/parsec-3.0/log/amd64* ./$EXP_DIR/$param-$i/guest$j; \
